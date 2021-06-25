@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Length Viewer</title>
+</head>
+<body>
+    <h1>Video Info</h1>
+    <br>
+    <form action="">
+        <div>
+            <label for="">Select A Video</label>
+            <br>
+            <input type="file" name="" id="" accept="video/*"> 
+            <!-- input for picking only videos -->
+
+        </div>
+        <br>
+        <br>
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        const electron = require('electron');
+
+        const {ipcRenderer} = electron;
+
+        document.querySelector('form').addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            // file selection
+            const file = document.querySelector('input').files[0];
+
+            const {path} = file; // destructuring the path from the file object
+            
+            // sending data back to the electron side of the app
+            ipcRenderer.send('video:submit', path);
+
+        });
+
+        ipcRenderer.on('video:duration', (event, duration) => {
+            let result = document.createElement('h1');
+            result.innerHTML = `Video Duration is: ${duration} seconds`;
+            document.body.appendChild(result);
+        })
+    </script>
+</body>
+</html>
