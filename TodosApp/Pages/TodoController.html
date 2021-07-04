@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <script>
+      const electron = require("electron");
+      const { ipcRenderer } = electron;
+
+      function addTodo() {
+        let form = document.createElement("form");
+        let container = document.createElement("div");
+        let label = document.createElement("label");
+        label.innerText = "Enter your Todo";
+        let input = document.createElement("input");
+        input.type = "text";
+        input.autofocus = true;
+        container.appendChild(label);
+        container.appendChild(input);
+        form.appendChild(container);
+        let btn = document.createElement("button");
+        btn.type = "submit";
+        btn.innerText = "Submit";
+        form.appendChild(btn);
+        document.body.appendChild(form);
+
+        document.querySelector("form").addEventListener("submit", (event) => {
+          event.preventDefault();
+
+          const value = document.querySelector("input").value;
+          ipcRenderer.send("todo:add", value);
+        });
+      }
+      ipcRenderer.on("todo:loadAddWindow", (event) => {
+        addTodo();
+      });
+
+      ipcRenderer.on("todo:loadDeleteWindow", (event, todoList) => {
+        console.log(todoList);
+        deleteTodo(todoList);
+      });
+
+      function deleteTodo(todoList) {
+        let form = document.createElement("form");
+        let container = document.createElement("div");
+        let dropdown = document.createElement("select");
+
+        // dummy option
+        let option = document.createElement("option");
+        option.innerText = "--select todo to delete--";
+        dropdown.appendChild(option);
+
+        for (let todo of todoList) {
+          let option = document.createElement("option");
+          option.innerText = todo;
+          dropdown.appendChild(option);
+        }
+        container.appendChild(dropdown);
+        form.appendChild(container);
+
+        let btnClearAll = document.createElement("button");
+        btnClearAll.id = "btnClearAll";
+        btnClearAll.innerText = "Delete All Todo";
+
+        let btnClear = document.createElement("button");
+        btnClear.id = "btnClear";
+        btnClear.innerText = "Delete Todos";
+
+        form.appendChild(btnClearAll);
+        form.appendChild(btnClear);
+
+        document.body.appendChild(form);
+
+        document
+          .querySelector("#btnClearAll")
+          .addEventListener("click", (event) => {
+            event.preventDefault();
+            ipcRenderer.send("todo:delete", []);
+          });
+
+        document
+          .querySelector("#btnClear")
+          .addEventListener("click", (event) => {
+            let deleteIndex = dropdown.selectedIndex;
+            if (deleteIndex < 1) {
+                alert("Please select a Todo To delete");
+                event.preventDefault();
+            }
+            else {
+              todoList.splice(deleteIndex-1, 1);
+              ipcRenderer.send("todo:delete", todoList);
+            }
+          });
+      }
+    </script>
+  </body>
+</html>

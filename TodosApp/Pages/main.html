@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todos</title>
+</head>
+<body>
+    <h1>My Todos</h1>
+    <ol>
+        <!-- list where todos appear -->
+    </ol>
+    <script>
+        let listOfTodos = []
+        const electron = require('electron');
+        const {ipcRenderer} = electron;
+
+        ipcRenderer.on('todo:sendToMainWindow', (event, todo) => {
+            let documentList = document.querySelector('ol');
+            let listItem = document.createElement('li');
+            listItem.innerText = todo;
+            documentList.appendChild(listItem);
+            listOfTodos.push(todo);
+        });
+
+        ipcRenderer.on('todo:updatedList', (event, UpdatedtodoList) => {
+            todoList = [];
+            let documentList = document.querySelector('ol');
+            documentList.innerHTML = '';
+            for (let todo of UpdatedtodoList){
+                let listItem = document.createElement('li');
+                listItem.innerText = todo;
+                documentList.appendChild(listItem);
+                listOfTodos.push(todo);
+            }
+        });
+    </script>
+</body>
+</html>
